@@ -20,6 +20,7 @@ def get_data(file):
 
     target_labels = data["y"]
     cat_features.remove("id")
+    cat_features.remove("y")
 
     cont_data = data[cont_features].astype("int64")
 
@@ -27,10 +28,11 @@ def get_data(file):
     start = True
     for cat in cat_features:
         cat_data_temp = cat_data[cat]
+        cat_data_temp_series = cat_data_temp.to_frame(cat)
         # cat_data_temp
-        cat_data_temp = cat_data_temp.T.to_dict().values()
+        cat_data_temp_series = cat_data_temp_series.T.to_dict().values()
         vectorizer = DictVectorizer(sparse=False)
-        vec_cat_data = vectorizer.fit_transform(cat_data_temp)
+        vec_cat_data = vectorizer.fit_transform(cat_data_temp_series)
 
         if start:
             cat_data_trans = vec_cat_data
