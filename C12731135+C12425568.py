@@ -1,6 +1,13 @@
 import pandas as pd
 import numpy as np
 from sklearn.feature_extraction import DictVectorizer
+from sklearn.cross_validation import StratifiedKFold
+from sklearn.cross_validation import cross_val_score
+from sklearn.cross_validation import cross_val_predict
+
+from sklearn import svm
+
+from sklearn.metrics import accuracy_score, confusion_matrix
 
 
 def get_data(file):
@@ -43,8 +50,28 @@ def get_data(file):
     return feat_data, target_labels
 
 
+def create_model(clf, data, targets, num_folds):
+    skf = StratifiedKFold(targets, n_folds=num_folds)
+
+    for train_i, test_i in skf:
+        train_target = [targets[x] for x in train_i]
+        train_feats = data[train_i]
+
+        clf.fit(train_feats, train_target)
+
+        test_target = [targets[x] for x in test_i]
+        test_feats = data[test_i]
+
+        pred_targets = clf.predict(test_feats)
+
+    print(cross_val_score(clf, data, targets, cv=skf))
+
+
 def main():
-    data, labels = get_data("data\\trainingset.txt")
+    train_data, train_labels = get_data("data\\trainingset.txt")
+    test_data, test_labels = get_data("data\\queries.txt")
+    clf = svm.SVC(kernel='poly', decision_function_shape='ovr')
+    create_model(clf, train_data, train_labels, 2)
 
 
 if __name__ == "__main__":
