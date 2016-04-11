@@ -8,6 +8,7 @@ from sklearn.cross_validation import cross_val_predict
 from sklearn.linear_model import LogisticRegression
 from sklearn import svm
 from sklearn.naive_bayes import GaussianNB, MultinomialNB, BernoulliNB
+from sklearn.neighbors import KNeighborsClassifier
 
 from sklearn.metrics import accuracy_score, confusion_matrix
 
@@ -67,9 +68,10 @@ def create_model(clf, data, targets, num_folds):
 
         pred_targets = clf.predict(test_feats)
         acc = accuracy_score(test_target, pred_targets)
-        print(acc)
+        # print(acc)
         conf_m = confusion_matrix(test_target, pred_targets)
         if start:
+            start = False
             cm = conf_m
             acc_list = [acc]
             tot_acc = acc
@@ -79,7 +81,7 @@ def create_model(clf, data, targets, num_folds):
             tot_acc += acc
 
     # print(acc_list)
-    print(cm)
+    # print(cm)
     avg_acc = tot_acc / num_folds
     print(avg_acc)
 
@@ -94,12 +96,13 @@ def runCls():
     test_data, test_labels = get_data("data\\queries.txt")
 
     # clf = svm.SVC(kernel='linear', decision_function_shape='ovr')
-    #clf = GaussianNB()
-    #create_model(clf, train_data, train_labels, 20)
+    # clf = GaussianNB()
+    # create_model(clf, train_data, train_labels, 20)
 
     for i in range(1,10):
-        #clf = svm.SVC(kernel='sigmoid', decision_function_shape='ovr')
-        clf = LogisticRegression(tol=i/10.0)
+        # clf = svm.SVC(kernel='sigmoid', decision_function_shape='ovr')
+        # clf = LogisticRegression(tol=i/100.0)
+        clf = KNeighborsClassifier(n_neighbors=5*i, algorithm='kd_tree')
         create_model(clf, train_data, train_labels, 10)
 
 
