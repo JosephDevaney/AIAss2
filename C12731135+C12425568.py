@@ -1,10 +1,11 @@
 import pandas as pd
 import numpy as np
+from timeit import Timer
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.cross_validation import StratifiedKFold
 from sklearn.cross_validation import cross_val_score
 from sklearn.cross_validation import cross_val_predict
-
+from sklearn.linear_model import LogisticRegression
 from sklearn import svm
 from sklearn.naive_bayes import GaussianNB, MultinomialNB, BernoulliNB
 
@@ -82,18 +83,29 @@ def create_model(clf, data, targets, num_folds):
     avg_acc = tot_acc / num_folds
     print(avg_acc)
 
+
     # print(cross_val_score(clf, data, targets, cv=skf))
     # pred_target = cross_val_predict(clf, data, targets, cv=skf)
     # print(confusion_matrix(targets[skf], pred_target))
 
 
-def main():
+def runCls():
     train_data, train_labels = get_data("data\\trainingset.txt")
     test_data, test_labels = get_data("data\\queries.txt")
-    # clf = svm.SVC(kernel='linear', decision_function_shape='ovr')
-    clf = GaussianNB()
-    create_model(clf, train_data, train_labels, 20)
 
+    # clf = svm.SVC(kernel='linear', decision_function_shape='ovr')
+    #clf = GaussianNB()
+    #create_model(clf, train_data, train_labels, 20)
+
+    for i in range(1,10):
+        #clf = svm.SVC(kernel='sigmoid', decision_function_shape='ovr')
+        clf = LogisticRegression(tol=i/10.0)
+        create_model(clf, train_data, train_labels, 10)
+
+
+def main():
+    t = Timer(lambda: runCls())
+    print(t.timeit(number=1))
 
 if __name__ == "__main__":
     main()
