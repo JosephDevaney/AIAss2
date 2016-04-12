@@ -85,9 +85,11 @@ def create_model(clf, data, targets, num_folds):
             tot_acc += acc
 
     # print(acc_list)
-    # print(cm)
+    print(cm)
+    avg_cls_acc = ((cm[0,0] / (cm[0,1] + cm[0,0])) + (cm[1,0] / (cm[1,1] + cm[1,0]))) / 2
+    print('average class accuracy: ', avg_cls_acc)
     avg_acc = tot_acc / num_folds
-    print(avg_acc)
+    print('average accuracy accross ', num_folds, ' folds: ', avg_acc)
 
 
     # print(cross_val_score(clf, data, targets, cv=skf))
@@ -121,7 +123,7 @@ def runCls():
 
 def main():
     t = Timer(lambda: runCls())
-    print(t.timeit(number=1))
+    print('runtime: ', t.timeit(number=1))
 
 if __name__ == "__main__":
     main()
