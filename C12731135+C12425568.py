@@ -16,9 +16,16 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix
 
+from sklearn.feature_selection import f_classif
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import SelectPercentile
+from sklearn.decomposition import PCA
+from sklearn.decomposition import TruncatedSVD
+from sklearn.decomposition import KernelPCA
+from sklearn.decomposition import RandomizedPCA
+
 
 def get_data(file):
-
     col_names = ["id", "age", "job", "marital", "education", "default", "balance", "housing", "loan", "contact", "day",
                  "month", "duration", "campaign", "pdays", "previous", "poutcome", "y"]
 
@@ -65,10 +72,16 @@ def create_model(clf, data, targets, num_folds):
         train_target = [targets[x] for x in train_i]
         train_feats = data[train_i]
 
+        # pca = PCA()
+        # pca.fit(train_feats)
+        # pca.transform(train_feats)
+
         clf.fit(train_feats, train_target)
 
         test_target = [targets[x] for x in test_i]
         test_feats = data[test_i]
+
+        # pca.transform(test_feats)
 
         pred_targets = clf.predict(test_feats)
         acc = accuracy_score(test_target, pred_targets)
@@ -86,10 +99,10 @@ def create_model(clf, data, targets, num_folds):
 
     # print(acc_list)
     print(cm)
-    avg_cls_acc = ((cm[0,0] / (cm[0,1] + cm[0,0])) + (cm[1,0] / (cm[1,1] + cm[1,0]))) / 2
+    avg_cls_acc = ((cm[0, 0] / (cm[0, 1] + cm[0, 0])) + (cm[1, 0] / (cm[1, 1] + cm[1, 0]))) / 2
     print('average class accuracy: ', avg_cls_acc)
     avg_acc = tot_acc / num_folds
-    print('average accuracy accross ', num_folds, ' folds: ', avg_acc)
+    print('average accuracy across ', num_folds, ' folds: ', avg_acc)
 
     # print(cross_val_score(clf, data, targets, cv=skf))
     # pred_target = cross_val_predict(clf, data, targets, cv=skf)
@@ -104,11 +117,12 @@ def runCls():
     # clf = GaussianNB()
     # create_model(clf, train_data, train_labels, 20)
 
-
-    clf = MLPClassifier(activation='logistic', tol=1e-4,algorithm='adam', warm_start=True, alpha=1e-6, max_iter=500, hidden_layer_sizes=(5, 2), random_state=2, verbose=True)
-    create_model(clf, train_data, train_labels, 10)
+    # clf = MLPClassifier(activation='logistic', tol=1e-4,algorithm='adam', warm_start=True, alpha=1e-6, max_iter=500, hidden_layer_sizes=(5, 2), random_state=2, verbose=True)
+    # create_model(clf, train_data, train_labels, 10)
     # clf = AdaBoostClassifier(base_estimator=LogisticRegression(tol=1))
     # create_model(clf, train_data, train_labels, 10)
+    clf = svm.SVC(kernel='sigmoid', decision_function_shape='ovr')
+    create_model(clf, train_data, train_labels, 10)
 
     # for i in range(1,10):
     #     clf = AdaBoostClassifier(base_estimator=LogisticRegression(tol=i))
@@ -120,10 +134,10 @@ def runCls():
     #     create_model(clf, train_data, train_labels, 10)
 
 
-
 def main():
     t = Timer(lambda: runCls())
     print('runtime: ', t.timeit(number=1))
+
 
 if __name__ == "__main__":
     main()
