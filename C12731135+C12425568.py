@@ -120,15 +120,16 @@ def runCls():
     # create_model(clf, train_data, train_labels, 10)
     # clf = AdaBoostClassifier(base_estimator=LogisticRegression(tol=1))
     # create_model(clf, train_data, train_labels, 10)
-    clf = svm.SVC(kernel='rbf', decision_function_shape='ovr', class_weight='balanced')
-    create_model(clf, train_data, train_labels, 10)
+    # clf = svm.SVC(kernel='linear', class_weight={'TypeB': 11,'TypeA':89})
+    # create_model(clf, train_data, train_labels, 10)
 
     # for i in range(1,10):
+    clf = LogisticRegression(tol=0.0001, class_weight={'TypeB': 1.24})
+    create_model(clf, train_data, train_labels, 10)
     #     clf = AdaBoostClassifier(base_estimator=LogisticRegression(tol=i))
     #     create_model(clf, train_data, train_labels, 10)
     #     clf = svm.SVC(kernel='sigmoid', decision_function_shape='ovr')
     #     create_model(clf, train_data, train_labels, 10)
-    #     # clf = LogisticRegression(tol=i/100.0)
     #     clf = KNeighborsClassifier(n_neighbors=10 * i, n_jobs=-1, algorithm='brute')
     #     create_model(clf, train_data, train_labels, 10)
 
