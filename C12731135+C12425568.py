@@ -99,8 +99,7 @@ def create_model(clf, data, targets, num_folds):
 
     # print(acc_list)
     print(cm)
-    avg_cls_acc = ((cm[0, 0] / (cm[0, 1] + cm[0, 0])) + (cm[1, 0] / (cm[1, 1] + cm[1, 0]))) / 2
-    print('average class accuracy: ', avg_cls_acc)
+
     avg_acc = tot_acc / num_folds
     print('average accuracy across ', num_folds, ' folds: ', avg_acc)
 
@@ -121,7 +120,7 @@ def runCls():
     # create_model(clf, train_data, train_labels, 10)
     # clf = AdaBoostClassifier(base_estimator=LogisticRegression(tol=1))
     # create_model(clf, train_data, train_labels, 10)
-    clf = svm.SVC(kernel='sigmoid', decision_function_shape='ovr')
+    clf = svm.SVC(kernel='rbf', decision_function_shape='ovr', class_weight='balanced')
     create_model(clf, train_data, train_labels, 10)
 
     # for i in range(1,10):
