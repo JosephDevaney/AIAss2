@@ -19,6 +19,8 @@ from sklearn.ensemble import BaggingClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix
 
+from sklearn.ensemble import VotingClassifier
+
 from sklearn.feature_selection import f_classif
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import SelectPercentile
@@ -91,7 +93,7 @@ def create_model(clf, data, targets, num_folds):
 
         pred_targets = clf.predict(test_feats)
         acc = accuracy_score(test_target, pred_targets)
-        print("Accuracy for fold " + str(k) + " is: ",)
+        print("Accuracy for fold " + str(k) + " is: ", )
         print(str(acc) + "\n")
         conf_m = confusion_matrix(test_target, pred_targets)
         if start:
@@ -119,12 +121,19 @@ def runCls():
     train_data, train_labels = get_data("data\\trainingset.txt")
     test_data, test_labels = get_data("data\\queries.txt")
 
+    clf1 = svm.SVC(class_weight='balanced', kernel='poly', decision_function_shape='ovr')
+    clf2 = LogisticRegression(class_weight='balanced', solver='sag', max_iter=1000)
+    clf3 = svm.SVC(kernel='sigmoid', decision_function_shape='ovr', class_weight='balanced')
+
+    vclf = VotingClassifier(estimators=[('lsvc', clf1), ('lr', clf2), ('sigsvc', clf3)], voting='soft')
+    create_model(vclf, train_data, train_labels, 10)
+
     # clf = svm.SVC(kernel='linear', decision_function_shape='ovr')
     # clf = GaussianNB()
     # create_model(clf, train_data, train_labels, 20)
 
     # clf = MLPClassifier(activation='logistic', tol=1e-4, algorithm='adam', warm_start=True, alpha=1e-6, max_iter=500,
-                        # hidden_layer_sizes=(5, 2), random_state=2, verbose=True)
+    # hidden_layer_sizes=(5, 2), random_state=2, verbose=True)
     # create_model(clf, train_data, train_labels, 10)
     # clf = AdaBoostClassifier(base_estimator=LogisticRegression(tol=1))
     # create_model(clf, train_data, train_labels, 10)
@@ -176,8 +185,8 @@ def runCls():
     #     #     clf = KNeighborsClassifier(n_neighbors=10 * i, n_jobs=-1, algorithm='brute')
     #     #     create_model(clf, train_data, train_labels, 10)
     # for i in range(1,10):
-    clf = BaggingClassifier(LogisticRegression(class_weight='balanced'), max_samples=0.1, max_features=0.1)
-    create_model(clf, train_data, train_labels, 10)
+    # clf = BaggingClassifier(LogisticRegression(class_weight='balanced'), max_samples=0.1, max_features=0.1)
+    # create_model(clf, train_data, train_labels, 10)
     #     clf = AdaBoostClassifier(base_estimator=LogisticRegression(tol=i))
     #     create_model(clf, train_data, train_labels, 10)
     #     clf = svm.SVC(kernel='sigmoid', decision_function_shape='ovr')
