@@ -91,7 +91,7 @@ def create_model(clf, data, targets, num_folds):
 
         pred_targets = clf.predict(test_feats)
         acc = accuracy_score(test_target, pred_targets)
-        print("Accuracy for fold " + k + " is: ",)
+        print("Accuracy for fold " + str(k) + " is: ",)
         print(str(acc) + "\n")
         conf_m = confusion_matrix(test_target, pred_targets)
         if start:
