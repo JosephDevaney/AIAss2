@@ -6,6 +6,7 @@ from sklearn.cross_validation import StratifiedKFold
 from sklearn.cross_validation import cross_val_score
 from sklearn.cross_validation import cross_val_predict
 from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegressionCV
 from sklearn import svm
 from sklearn.naive_bayes import GaussianNB, MultinomialNB, BernoulliNB
 from sklearn.neighbors import KNeighborsClassifier
@@ -26,6 +27,7 @@ from sklearn.decomposition import RandomizedPCA
 from sklearn.grid_search import GridSearchCV
 from sklearn.metrics import classification_report
 from sklearn.svm import SVC
+
 
 def get_data(file):
     col_names = ["id", "age", "job", "marital", "education", "default", "balance", "housing", "loan", "contact", "day",
@@ -70,7 +72,7 @@ def create_model(clf, data, targets, num_folds):
     skf = StratifiedKFold(targets, n_folds=num_folds)
 
     start = True
-    for train_i, test_i in skf:
+    for k, (train_i, test_i) in enumerate(skf):
         train_target = [targets[x] for x in train_i]
         train_feats = data[train_i]
 
@@ -87,7 +89,8 @@ def create_model(clf, data, targets, num_folds):
 
         pred_targets = clf.predict(test_feats)
         acc = accuracy_score(test_target, pred_targets)
-        # print(acc)
+        print("Accuracy for fold " + k + " is: ",)
+        print(str(acc) + "\n")
         conf_m = confusion_matrix(test_target, pred_targets)
         if start:
             start = False
@@ -118,53 +121,59 @@ def runCls():
     # clf = GaussianNB()
     # create_model(clf, train_data, train_labels, 20)
 
-    # clf = MLPClassifier(activation='logistic', tol=1e-4,algorithm='adam', warm_start=True, alpha=1e-6, max_iter=500, hidden_layer_sizes=(5, 2), random_state=2, verbose=True)
+    # clf = MLPClassifier(activation='logistic', tol=1e-4, algorithm='adam', warm_start=True, alpha=1e-6, max_iter=500,
+                        # hidden_layer_sizes=(5, 2), random_state=2, verbose=True)
     # create_model(clf, train_data, train_labels, 10)
     # clf = AdaBoostClassifier(base_estimator=LogisticRegression(tol=1))
     # create_model(clf, train_data, train_labels, 10)
     # clf = svm.SVC(kernel='rbf', class_weight={'TypeB': 1.24})
     # create_model(clf, train_data, train_labels, 10)
 
-    tuned_parameters = [{'kernel': ['rbf'], 'gamma': [1e-3, 1e-4], 'class_weight':[{'TypeB': w} for w in [1.25, 1.26, 1.27, 1.28, 1.29]],
-                         'C': [1, 10, 100, 1000]}]
+    clf = LogisticRegressionCV(cv=5, class_weight='balanced', n_jobs=-1, solver='sag', max_iter=1000)
 
-    scores = ['precision', 'recall']
+    create_model(clf, train_data, train_labels, 5)
 
-    for score in scores:
-        print("# Tuning hyper-parameters for %s" % score)
-        print()
-
-        clf = GridSearchCV(SVC(C=1), tuned_parameters, cv=5,
-                           scoring='%s_weighted' % score)
-        clf.fit(train_data, train_labels)
-
-        print("Best parameters set found on development set:")
-        print()
-        print(clf.best_params_)
-        print()
-        print("Grid scores on development set:")
-        print()
-        for params, mean_score, scores in clf.grid_scores_:
-            print("%0.3f (+/-%0.03f) for %r"
-                  % (mean_score, scores.std() * 2, params))
-        print()
-
-        print("Detailed classification report:")
-        print()
-        print("The model is trained on the full development set.")
-        print("The scores are computed on the full evaluation set.")
-        print()
-        y_true, y_pred = train_labels, clf.predict(train_data)
-        print(classification_report(y_true, y_pred))
-        print()
-
-    # create_model(clf, train_data, train_labels, 10, tuned_parameters)
-    #     clf = AdaBoostClassifier(base_estimator=LogisticRegression(tol=i))
-    #     create_model(clf, train_data, train_labels, 10)
-    #     clf = svm.SVC(kernel='sigmoid', decision_function_shape='ovr')
-    #     create_model(clf, train_data, train_labels, 10)
-    #     clf = KNeighborsClassifier(n_neighbors=10 * i, n_jobs=-1, algorithm='brute')
-    #     create_model(clf, train_data, train_labels, 10)
+    # tuned_parameters = [{'kernel': ['rbf'], 'gamma': [1e-3, 1e-4],
+    #                      'class_weight': [{'TypeB': w} for w in [1.25, 1.26, 1.27, 1.28, 1.29]],
+    #                      'C': [1, 10, 100, 1000]}]
+    #
+    # scores = ['precision', 'recall']
+    #
+    # for score in scores:
+    #     print("# Tuning hyper-parameters for %s" % score)
+    #     print()
+    #
+    #     clf = GridSearchCV(SVC(C=1), tuned_parameters, cv=5,
+    #                        scoring='%s_weighted' % score)
+    #     clf.fit(train_data, train_labels)
+    #
+    #     print("Best parameters set found on development set:")
+    #     print()
+    #     print(clf.best_params_)
+    #     print()
+    #     print("Grid scores on development set:")
+    #     print()
+    #     for params, mean_score, scores in clf.grid_scores_:
+    #         print("%0.3f (+/-%0.03f) for %r"
+    #               % (mean_score, scores.std() * 2, params))
+    #     print()
+    #
+    #     print("Detailed classification report:")
+    #     print()
+    #     print("The model is trained on the full development set.")
+    #     print("The scores are computed on the full evaluation set.")
+    #     print()
+    #     y_true, y_pred = train_labels, clf.predict(train_data)
+    #     print(classification_report(y_true, y_pred))
+    #     print()
+    #
+    #     # create_model(clf, train_data, train_labels, 10, tuned_parameters)
+    #     #     clf = AdaBoostClassifier(base_estimator=LogisticRegression(tol=i))
+    #     #     create_model(clf, train_data, train_labels, 10)
+    #     #     clf = svm.SVC(kernel='sigmoid', decision_function_shape='ovr')
+    #     #     create_model(clf, train_data, train_labels, 10)
+    #     #     clf = KNeighborsClassifier(n_neighbors=10 * i, n_jobs=-1, algorithm='brute')
+    #     #     create_model(clf, train_data, train_labels, 10)
 
 
 def main():
