@@ -23,7 +23,9 @@ from sklearn.decomposition import PCA
 from sklearn.decomposition import TruncatedSVD
 from sklearn.decomposition import KernelPCA
 from sklearn.decomposition import RandomizedPCA
-
+from sklearn.grid_search import GridSearchCV
+from sklearn.metrics import classification_report
+from sklearn.svm import SVC
 
 def get_data(file):
     col_names = ["id", "age", "job", "marital", "education", "default", "balance", "housing", "loan", "contact", "day",
@@ -120,12 +122,43 @@ def runCls():
     # create_model(clf, train_data, train_labels, 10)
     # clf = AdaBoostClassifier(base_estimator=LogisticRegression(tol=1))
     # create_model(clf, train_data, train_labels, 10)
-    # clf = svm.SVC(kernel='linear', class_weight={'TypeB': 11,'TypeA':89})
+    # clf = svm.SVC(kernel='rbf', class_weight={'TypeB': 1.24})
     # create_model(clf, train_data, train_labels, 10)
 
-    # for i in range(1,10):
-    clf = LogisticRegression(tol=0.0001, class_weight={'TypeB': 1.24})
-    create_model(clf, train_data, train_labels, 10)
+    tuned_parameters = [{'kernel': ['rbf'], 'gamma': [1e-3, 1e-4], 'class_weight':[{'TypeB': w} for w in [1.25, 1.26, 1.27, 1.28, 1.29]],
+                         'C': [1, 10, 100, 1000]}]
+
+    scores = ['precision', 'recall']
+
+    for score in scores:
+        print("# Tuning hyper-parameters for %s" % score)
+        print()
+
+        clf = GridSearchCV(SVC(C=1), tuned_parameters, cv=5,
+                           scoring='%s_weighted' % score)
+        clf.fit(train_data, train_labels)
+
+        print("Best parameters set found on development set:")
+        print()
+        print(clf.best_params_)
+        print()
+        print("Grid scores on development set:")
+        print()
+        for params, mean_score, scores in clf.grid_scores_:
+            print("%0.3f (+/-%0.03f) for %r"
+                  % (mean_score, scores.std() * 2, params))
+        print()
+
+        print("Detailed classification report:")
+        print()
+        print("The model is trained on the full development set.")
+        print("The scores are computed on the full evaluation set.")
+        print()
+        y_true, y_pred = train_labels, clf.predict(train_data)
+        print(classification_report(y_true, y_pred))
+        print()
+
+    # create_model(clf, train_data, train_labels, 10, tuned_parameters)
     #     clf = AdaBoostClassifier(base_estimator=LogisticRegression(tol=i))
     #     create_model(clf, train_data, train_labels, 10)
     #     clf = svm.SVC(kernel='sigmoid', decision_function_shape='ovr')
