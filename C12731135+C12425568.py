@@ -8,12 +8,14 @@ from sklearn.cross_validation import cross_val_predict
 from sklearn.linear_model import LogisticRegression
 from sklearn.linear_model import LogisticRegressionCV
 from sklearn import svm
+from sklearn import linear_model
 from sklearn.naive_bayes import GaussianNB, MultinomialNB, BernoulliNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import BaggingClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix
 
@@ -128,10 +130,9 @@ def runCls():
     # create_model(clf, train_data, train_labels, 10)
     # clf = svm.SVC(kernel='rbf', class_weight={'TypeB': 1.24})
     # create_model(clf, train_data, train_labels, 10)
-
-    clf = LogisticRegressionCV(cv=5, class_weight='balanced', n_jobs=-1, solver='sag', max_iter=1000)
-
-    create_model(clf, train_data, train_labels, 5)
+    # clf = LogisticRegressionCV(cv=5, class_weight='balanced', n_jobs=-1, solver='sag', max_iter=1000)
+    #
+    # create_model(clf, train_data, train_labels, 5)
 
     # tuned_parameters = [{'kernel': ['rbf'], 'gamma': [1e-3, 1e-4],
     #                      'class_weight': [{'TypeB': w} for w in [1.25, 1.26, 1.27, 1.28, 1.29]],
@@ -174,6 +175,15 @@ def runCls():
     #     #     create_model(clf, train_data, train_labels, 10)
     #     #     clf = KNeighborsClassifier(n_neighbors=10 * i, n_jobs=-1, algorithm='brute')
     #     #     create_model(clf, train_data, train_labels, 10)
+    # for i in range(1,10):
+    clf = BaggingClassifier(LogisticRegression(class_weight='balanced'), max_samples=0.1, max_features=0.1)
+    create_model(clf, train_data, train_labels, 10)
+    #     clf = AdaBoostClassifier(base_estimator=LogisticRegression(tol=i))
+    #     create_model(clf, train_data, train_labels, 10)
+    #     clf = svm.SVC(kernel='sigmoid', decision_function_shape='ovr')
+    #     create_model(clf, train_data, train_labels, 10)
+    #     clf = KNeighborsClassifier(n_neighbors=10 * i, n_jobs=-1, algorithm='brute')
+    #     create_model(clf, train_data, train_labels, 10)
 
 
 def main():
