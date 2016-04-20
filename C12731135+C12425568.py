@@ -16,6 +16,7 @@ from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import BaggingClassifier
+from sklearn.ensemble import VotingClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix
 
@@ -70,7 +71,7 @@ def get_data(file):
     return feat_data, target_labels
 
 
-def create_model(clf, data, targets, num_folds):
+def create_model(clf, clf2, clf3, data, targets, num_folds):
     skf = StratifiedKFold(targets, n_folds=num_folds)
 
     start = True
@@ -82,14 +83,15 @@ def create_model(clf, data, targets, num_folds):
         # pca.fit(train_feats)
         # pca.transform(train_feats)
 
-        clf.fit(train_feats, train_target)
+        eclf1 = VotingClassifier(estimators=[('lr', clf), ('rf', clf2), ('gnb', clf3)], voting='hard')
+        eclf1 = eclf1.fit(train_feats, train_target)
 
         test_target = [targets[x] for x in test_i]
         test_feats = data[test_i]
 
         # pca.transform(test_feats)
 
-        pred_targets = clf.predict(test_feats)
+        pred_targets = eclf1.predict(test_feats)
         acc = accuracy_score(test_target, pred_targets)
         print("Accuracy for fold " + str(k) + " is: ",)
         print(str(acc) + "\n")
@@ -108,6 +110,7 @@ def create_model(clf, data, targets, num_folds):
     print(cm)
 
     avg_acc = tot_acc / num_folds
+
     print('average accuracy across ', num_folds, ' folds: ', avg_acc)
 
     # print(cross_val_score(clf, data, targets, cv=skf))
@@ -176,8 +179,12 @@ def runCls():
     #     #     clf = KNeighborsClassifier(n_neighbors=10 * i, n_jobs=-1, algorithm='brute')
     #     #     create_model(clf, train_data, train_labels, 10)
     # for i in range(1,10):
+    # clf = BaggingClassifier(LogisticRegression(class_weight='balanced'), max_samples=0.1, max_features=0.1)
+    # create_model(clf, train_data, train_labels, 10)
     clf = BaggingClassifier(LogisticRegression(class_weight='balanced'), max_samples=0.1, max_features=0.1)
-    create_model(clf, train_data, train_labels, 10)
+    clf2 = RandomForestClassifier(random_state=1)
+    clf3 = GaussianNB()
+    create_model(clf, clf2, clf3, train_data, train_labels, 10)
     #     clf = AdaBoostClassifier(base_estimator=LogisticRegression(tol=i))
     #     create_model(clf, train_data, train_labels, 10)
     #     clf = svm.SVC(kernel='sigmoid', decision_function_shape='ovr')
