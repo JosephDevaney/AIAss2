@@ -33,6 +33,8 @@ from sklearn.grid_search import GridSearchCV
 from sklearn.metrics import classification_report
 from sklearn.svm import SVC
 
+import os
+
 
 def get_data(file):
     col_names = ["id", "age", "job", "marital", "education", "default", "balance", "housing", "loan", "contact", "day",
@@ -49,6 +51,7 @@ def get_data(file):
             cont_features.append(col)
 
     target_labels = data["y"]
+    data_ids = data["id"]
     cat_features.remove("id")
     cat_features.remove("y")
 
@@ -70,10 +73,10 @@ def get_data(file):
 
     feat_data = np.hstack((cont_data.as_matrix(), vec_cat_data))
 
-    return feat_data, target_labels
+    return feat_data, target_labels, data_ids
 
 
-def create_model(clf, clf2, clf3, data, targets, num_folds):
+def create_model(clf, data, targets, num_folds):
     skf = StratifiedKFold(targets, n_folds=num_folds)
 
     start = True
@@ -119,9 +122,32 @@ def create_model(clf, clf2, clf3, data, targets, num_folds):
     # print(confusion_matrix(targets[skf], pred_target))
 
 
-def runCls():
-    train_data, train_labels = get_data("data\\trainingset.txt")
-    test_data, test_labels = get_data("data\\queries.txt")
+def predict_queries(clf, train_feats, train_target, queries):
+    clf.fit(train_feats, train_target)
+    pred_labels = clf.predict(queries)
+
+    return pred_labels
+
+
+def write_preds(query_ids, pred_labels):
+    contain_sol_dir = False
+    for d in os.listdir():
+        if d == "solutions":
+            contain_sol_dir = True
+
+    if not contain_sol_dir:
+        os.mkdir("./solutions")
+
+    filename = "./solutions/C12731135+C12425568.txt"
+    solutions = open(filename, 'w+')
+
+    [solutions.write(qid + "," + pred_l + "\n") for qid, pred_l in zip(query_ids, pred_labels)]
+    solutions.close()
+
+
+def run_cls():
+    train_data, train_labels, train_ids = get_data("data\\trainingset.txt")
+    test_data, test_labels, test_ids = get_data("data\\queries.txt")
 
     # clf1 = svm.SVC(class_weight='balanced', kernel='poly', decision_function_shape='ovr')
     # clf2 = LogisticRegression(class_weight='balanced', solver='sag', max_iter=1000)
@@ -191,11 +217,11 @@ def runCls():
     # create_model(clf, train_data, train_labels, 10)
 
     clf = BaggingClassifier(LogisticRegression(class_weight='balanced'), max_samples=0.1, max_features=0.1)
-    clf2 = RandomForestClassifier(random_state=1, class_weight='balanced')
-    clf3 = KNeighborsClassifier(n_neighbors=10, n_jobs=-1, algorithm='brute')
+    # clf2 = RandomForestClassifier(random_state=1, class_weight='balanced')
+    # clf3 = KNeighborsClassifier(n_neighbors=10, n_jobs=-1, algorithm='brute')
 
-    eclf1 = VotingClassifier(estimators=[('lr', clf), ('rf', clf2), ('gnb', clf3)], voting='soft')
-    create_model(eclf1, clf2, clf3, train_data, train_labels, 10)
+    # eclf1 = VotingClassifier(estimators=[('lr', clf), ('rf', clf2), ('gnb', clf3)], voting='soft')
+    create_model(clf, train_data, train_labels, 2)
     
     #     clf = AdaBoostClassifier(base_estimator=LogisticRegression(tol=i))
     #     create_model(clf, train_data, train_labels, 10)
@@ -204,9 +230,12 @@ def runCls():
     #     clf = KNeighborsClassifier(n_neighbors=10 * i, n_jobs=-1, algorithm='brute')
     #     create_model(clf, train_data, train_labels, 10)
 
+    results = predict_queries(clf, train_data, train_labels, test_data)
+    write_preds(test_ids, results)
+
 
 def main():
-    t = Timer(lambda: runCls())
+    t = Timer(lambda: run_cls())
     print('runtime: ', t.timeit(number=1))
 
 
