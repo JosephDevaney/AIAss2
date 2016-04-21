@@ -83,7 +83,7 @@ def create_model(clf, clf2, clf3, data, targets, num_folds):
         # pca.fit(train_feats)
         # pca.transform(train_feats)
 
-        eclf1 = VotingClassifier(estimators=[('lr', clf), ('rf', clf2), ('gnb', clf3)], voting='hard')
+        eclf1 = VotingClassifier(estimators=[('lr', clf), ('rf', clf2), ('gnb', clf3)], voting='soft')
         eclf1 = eclf1.fit(train_feats, train_target)
 
         test_target = [targets[x] for x in test_i]
@@ -182,8 +182,8 @@ def runCls():
     # clf = BaggingClassifier(LogisticRegression(class_weight='balanced'), max_samples=0.1, max_features=0.1)
     # create_model(clf, train_data, train_labels, 10)
     clf = BaggingClassifier(LogisticRegression(class_weight='balanced'), max_samples=0.1, max_features=0.1)
-    clf2 = svm.LinearSVC(class_weight='balanced')
-    clf3 =  svm.SVC(kernel='sigmoid', decision_function_shape='ovr')
+    clf2 = RandomForestClassifier(random_state=1, class_weight='balanced')
+    clf3 = KNeighborsClassifier(n_neighbors=10, n_jobs=-1, algorithm='brute')
     create_model(clf, clf2, clf3, train_data, train_labels, 10)
     #     clf = AdaBoostClassifier(base_estimator=LogisticRegression(tol=i))
     #     create_model(clf, train_data, train_labels, 10)
