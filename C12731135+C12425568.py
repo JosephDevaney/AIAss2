@@ -85,15 +85,14 @@ def create_model(clf, clf2, clf3, data, targets, num_folds):
         # pca.fit(train_feats)
         # pca.transform(train_feats)
 
-        eclf1 = VotingClassifier(estimators=[('lr', clf), ('rf', clf2), ('gnb', clf3)], voting='soft')
-        eclf1 = eclf1.fit(train_feats, train_target)
+        clf.fit(train_feats, train_target)
 
         test_target = [targets[x] for x in test_i]
         test_feats = data[test_i]
 
         # pca.transform(test_feats)
 
-        pred_targets = eclf1.predict(test_feats)
+        pred_targets = clf.predict(test_feats)
         acc = accuracy_score(test_target, pred_targets)
         print("Accuracy for fold " + str(k) + " is: ", )
         print(str(acc) + "\n")
@@ -124,12 +123,12 @@ def runCls():
     train_data, train_labels = get_data("data\\trainingset.txt")
     test_data, test_labels = get_data("data\\queries.txt")
 
-    clf1 = svm.SVC(class_weight='balanced', kernel='poly', decision_function_shape='ovr')
-    clf2 = LogisticRegression(class_weight='balanced', solver='sag', max_iter=1000)
-    clf3 = svm.SVC(kernel='sigmoid', decision_function_shape='ovr', class_weight='balanced')
-
-    vclf = VotingClassifier(estimators=[('lsvc', clf1), ('lr', clf2), ('sigsvc', clf3)], voting='soft')
-    create_model(vclf, train_data, train_labels, 10)
+    # clf1 = svm.SVC(class_weight='balanced', kernel='poly', decision_function_shape='ovr')
+    # clf2 = LogisticRegression(class_weight='balanced', solver='sag', max_iter=1000)
+    # clf3 = svm.SVC(kernel='sigmoid', decision_function_shape='ovr', class_weight='balanced')
+    #
+    # vclf = VotingClassifier(estimators=[('lsvc', clf1), ('lr', clf2), ('sigsvc', clf3)], voting='soft')
+    # create_model(vclf, train_data, train_labels, 10)
 
     # clf = svm.SVC(kernel='linear', decision_function_shape='ovr')
     # clf = GaussianNB()
@@ -194,7 +193,9 @@ def runCls():
     clf = BaggingClassifier(LogisticRegression(class_weight='balanced'), max_samples=0.1, max_features=0.1)
     clf2 = RandomForestClassifier(random_state=1, class_weight='balanced')
     clf3 = KNeighborsClassifier(n_neighbors=10, n_jobs=-1, algorithm='brute')
-    create_model(clf, clf2, clf3, train_data, train_labels, 10)
+
+    eclf1 = VotingClassifier(estimators=[('lr', clf), ('rf', clf2), ('gnb', clf3)], voting='soft')
+    create_model(eclf1, clf2, clf3, train_data, train_labels, 10)
     
     #     clf = AdaBoostClassifier(base_estimator=LogisticRegression(tol=i))
     #     create_model(clf, train_data, train_labels, 10)
