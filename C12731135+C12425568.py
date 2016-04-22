@@ -139,15 +139,42 @@ def write_preds(query_ids, pred_labels):
         os.mkdir("./solutions")
 
     filename = "./solutions/C12731135+C12425568.txt"
-    solutions = open(filename, 'w+')
+    solutions = open(filename, 'w')
 
     [solutions.write(qid + "," + pred_l + "\n") for qid, pred_l in zip(query_ids, pred_labels)]
     solutions.close()
 
 
+def create_even_dataset(data, labels, ids):
+    data_a = [i for i, label in enumerate(labels) if label == "TypeA"]
+    data_b = [i for i, label in enumerate(labels) if label == "TypeB"]
+
+    short_data = slice_array(data, data_a, data_b)
+    short_labels = slice_lists(labels, data_a, data_b)
+    short_ids = slice_lists(ids, data_a, data_b)
+
+    return short_data, short_labels, short_ids
+
+
+def slice_array(data, slice_a, slice_b):
+    short_data = data[slice_a[:len(slice_b)]]
+    short_data = np.vstack((short_data, data[slice_b]))
+
+    return short_data
+
+
+def slice_lists(data, slice_a, slice_b):
+    short_data = data[slice_a[:len(slice_b)]].tolist()
+    short_data.extend(data[slice_b])
+
+    return short_data
+
+
 def run_cls():
     train_data, train_labels, train_ids = get_data("data\\trainingset.txt")
     test_data, test_labels, test_ids = get_data("data\\queries.txt")
+
+    train_data, train_labels, train_ids = create_even_dataset(train_data, train_labels, train_ids)
 
     # clf1 = svm.SVC(class_weight='balanced', kernel='poly', decision_function_shape='ovr')
     # clf2 = LogisticRegression(class_weight='balanced', solver='sag', max_iter=1000)
@@ -167,7 +194,7 @@ def run_cls():
     # create_model(clf, train_data, train_labels, 10)
     # clf = svm.SVC(kernel='rbf', class_weight={'TypeB': 1.24})
     # create_model(clf, train_data, train_labels, 10)
-    # clf = LogisticRegressionCV(cv=5, class_weight='balanced', n_jobs=-1, solver='sag', max_iter=1000)
+    clf = LogisticRegressionCV(cv=5, class_weight='balanced', n_jobs=-1, solver='sag', max_iter=1000)
     #
     # create_model(clf, train_data, train_labels, 5)
 
@@ -216,12 +243,12 @@ def run_cls():
     # clf = BaggingClassifier(LogisticRegression(class_weight='balanced'), max_samples=0.1, max_features=0.1)
     # create_model(clf, train_data, train_labels, 10)
 
-    clf = BaggingClassifier(LogisticRegression(class_weight='balanced'), max_samples=0.1, max_features=0.1)
+    # clf1 = BaggingClassifier(LogisticRegression(class_weight='balanced'), max_samples=0.1, max_features=0.1)
     # clf2 = RandomForestClassifier(random_state=1, class_weight='balanced')
     # clf3 = KNeighborsClassifier(n_neighbors=10, n_jobs=-1, algorithm='brute')
+    #
+    # clf = VotingClassifier(estimators=[('lr', clf1), ('rf', clf2), ('gnb', clf3)], voting='soft')
 
-    # eclf1 = VotingClassifier(estimators=[('lr', clf), ('rf', clf2), ('gnb', clf3)], voting='soft')
-    create_model(clf, train_data, train_labels, 2)
     
     #     clf = AdaBoostClassifier(base_estimator=LogisticRegression(tol=i))
     #     create_model(clf, train_data, train_labels, 10)
@@ -230,6 +257,7 @@ def run_cls():
     #     clf = KNeighborsClassifier(n_neighbors=10 * i, n_jobs=-1, algorithm='brute')
     #     create_model(clf, train_data, train_labels, 10)
 
+    create_model(clf, train_data, train_labels, 5)
     results = predict_queries(clf, train_data, train_labels, test_data)
     write_preds(test_ids, results)
 
