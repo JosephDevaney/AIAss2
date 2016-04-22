@@ -97,8 +97,8 @@ def create_model(clf, data, targets, num_folds):
 
         pred_targets = clf.predict(test_feats)
         acc = accuracy_score(test_target, pred_targets)
-        print("Accuracy for fold " + str(k) + " is: ", )
-        print(str(acc) + "\n")
+        # print("Accuracy for fold " + str(k) + " is: ", )
+        # print(str(acc) + "\n")
         conf_m = confusion_matrix(test_target, pred_targets)
         if start:
             start = False
@@ -174,7 +174,7 @@ def run_cls():
     train_data, train_labels, train_ids = get_data("data\\trainingset.txt")
     test_data, test_labels, test_ids = get_data("data\\queries.txt")
 
-    train_data, train_labels, train_ids = create_even_dataset(train_data, train_labels, train_ids)
+    # train_data, train_labels, train_ids = create_even_dataset(train_data, train_labels, train_ids)
 
     # clf1 = svm.SVC(class_weight='balanced', kernel='poly', decision_function_shape='ovr')
     # clf2 = LogisticRegression(class_weight='balanced', solver='sag', max_iter=1000)
@@ -191,10 +191,12 @@ def run_cls():
     # hidden_layer_sizes=(5, 2), random_state=2, verbose=True)
     # create_model(clf, train_data, train_labels, 10)
     # clf = AdaBoostClassifier(base_estimator=LogisticRegression(tol=1))
+    # Almost always predicts TypeA
     # create_model(clf, train_data, train_labels, 10)
     # clf = svm.SVC(kernel='rbf', class_weight={'TypeB': 1.24})
     # create_model(clf, train_data, train_labels, 10)
-    # clf = LogisticRegressionCV(cv=5, class_weight='balanced', n_jobs=-1, solver='sag', max_iter=1000)
+    # clf = LogisticRegressionCV(cv=5, class_weight=None, n_jobs=-1, solver='sag', max_iter=10000)
+    # Always predicts TypeA
     #
     # create_model(clf, train_data, train_labels, 5)
 
@@ -240,7 +242,8 @@ def run_cls():
     #     #     clf = KNeighborsClassifier(n_neighbors=10 * i, n_jobs=-1, algorithm='brute')
     #     #     create_model(clf, train_data, train_labels, 10)
     # for i in range(1,10):
-    clf = BaggingClassifier(LogisticRegression(class_weight='balanced'), max_samples=0.5, max_features=0.5)
+    # clf = BaggingClassifier(LogisticRegression(class_weight='balanced'), max_samples=0.1, max_features=0.1)
+    # 0.6-0.72
     # create_model(clf, train_data, train_labels, 10)
 
     # clf1 = BaggingClassifier(LogisticRegression(class_weight='balanced'), max_samples=0.1, max_features=0.1)
@@ -256,7 +259,15 @@ def run_cls():
     #     clf = KNeighborsClassifier(n_neighbors=10 * i, n_jobs=-1, algorithm='brute')
     #     create_model(clf, train_data, train_labels, 10)
 
-    create_model(clf, train_data, train_labels, 5)
+    # clf = svm.LinearSVC(class_weight=None)
+
+    # clf = RandomForestClassifier(random_state=1, class_weight=None)
+
+    # clf = KNeighborsClassifier(n_neighbors=30, n_jobs=-1, algorithm='ball_tree')
+
+    clf = LogisticRegression(n_jobs=-1, class_weight=None)
+
+    create_model(clf, train_data, train_labels, 10)
     results = predict_queries(clf, train_data, train_labels, test_data)
     write_preds(test_ids, results)
 
