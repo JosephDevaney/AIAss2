@@ -194,7 +194,7 @@ def run_cls():
     # create_model(clf, train_data, train_labels, 10)
     # clf = svm.SVC(kernel='rbf', class_weight={'TypeB': 1.24})
     # create_model(clf, train_data, train_labels, 10)
-    clf = LogisticRegressionCV(cv=5, class_weight='balanced', n_jobs=-1, solver='sag', max_iter=1000)
+    # clf = LogisticRegressionCV(cv=5, class_weight='balanced', n_jobs=-1, solver='sag', max_iter=1000)
     #
     # create_model(clf, train_data, train_labels, 5)
 
@@ -240,7 +240,7 @@ def run_cls():
     #     #     clf = KNeighborsClassifier(n_neighbors=10 * i, n_jobs=-1, algorithm='brute')
     #     #     create_model(clf, train_data, train_labels, 10)
     # for i in range(1,10):
-    # clf = BaggingClassifier(LogisticRegression(class_weight='balanced'), max_samples=0.1, max_features=0.1)
+    clf = BaggingClassifier(LogisticRegression(class_weight='balanced'), max_samples=0.5, max_features=0.5)
     # create_model(clf, train_data, train_labels, 10)
 
     # clf1 = BaggingClassifier(LogisticRegression(class_weight='balanced'), max_samples=0.1, max_features=0.1)
@@ -249,7 +249,6 @@ def run_cls():
     #
     # clf = VotingClassifier(estimators=[('lr', clf1), ('rf', clf2), ('gnb', clf3)], voting='soft')
 
-    
     #     clf = AdaBoostClassifier(base_estimator=LogisticRegression(tol=i))
     #     create_model(clf, train_data, train_labels, 10)
     #     clf = svm.SVC(kernel='sigmoid', decision_function_shape='ovr')
