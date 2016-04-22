@@ -106,11 +106,11 @@ def create_model(clf, data, targets, num_folds):
             acc_list.append(acc)
             tot_acc += acc
 
-    print(cm)
+    # print(cm)
 
     avg_acc = tot_acc / num_folds
 
-    print('average accuracy across ', num_folds, ' folds: ', avg_acc)
+    # print('average accuracy across ', num_folds, ' folds: ', avg_acc)
 
 
 # Used to fit() and predict() a classifier on the full testing set of queries
