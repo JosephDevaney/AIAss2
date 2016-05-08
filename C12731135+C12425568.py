@@ -8,7 +8,7 @@ import pandas as pd
 from sklearn.cross_validation import StratifiedKFold
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 
 
 # get_data takes a filename and path to a file containing the data
@@ -76,6 +76,10 @@ def create_model(clf, data, targets, num_folds):
     skf = StratifiedKFold(targets, n_folds=num_folds)
 
     start = True
+
+    total_targets = []
+    total_preds = []
+
     for k, (train_i, test_i) in enumerate(skf):
         train_target = [targets[x] for x in train_i]
         train_feats = data[train_i]
@@ -106,11 +110,17 @@ def create_model(clf, data, targets, num_folds):
             acc_list.append(acc)
             tot_acc += acc
 
-    # print(cm)
+        total_targets.extend(test_target)
+        total_preds.extend(pred_targets)
+
+    print(cm)
+    print("REPORT!!!\n")
+    print(classification_report(total_targets, total_preds))
 
     avg_acc = tot_acc / num_folds
 
-    # print('average accuracy across ', num_folds, ' folds: ', avg_acc)
+
+    print('\n\naverage accuracy across ', num_folds, ' folds: ', avg_acc)
 
 
 # Used to fit() and predict() a classifier on the full testing set of queries
